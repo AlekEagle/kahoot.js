@@ -2,7 +2,7 @@ const EventEmitter = require("events");
 const token = require("./util/token.js");
 const ws = require("ws");
 const sleep = require("./util/sleep.js");
-const ua = require("user-agents");
+const ua = require("random-useragent");
 const ChallengeHandler = require("./util/ChallengeHandler.js");
 
 // A Kahoot! client.
@@ -47,7 +47,7 @@ class Client extends EventEmitter{
     // apply main modules
     require("./modules/main.js").call(this);
 
-    this.userAgent = (new ua()).toString();
+    this.userAgent = ua.getRandom();
     this.messageId = 0;
   }
 
@@ -132,6 +132,7 @@ class Client extends EventEmitter{
         if(message.channel === "/service/status"){
           this.emit("status",message.data);
           if(message.data.status === "LOCKED"){
+            message.data.description = "Locked";
             reject(message.data);
             delete this.handlers.JoinFinish;
             this.disconnectReason = "Quiz Locked";
@@ -149,7 +150,7 @@ class Client extends EventEmitter{
           }else{
             this.cid = message.data.cid;
             if(settings.gameMode === "team"){
-              await sleep(1)
+              await sleep(1);
               if(team !== false){
                 team = team || ["Player 1","Player 2","Player 3","Player 4"];
                 // send team!
@@ -303,7 +304,9 @@ class Client extends EventEmitter{
       this.on("HandshakeComplete",()=>{
         res(data.data);
       });
-      this.on("HandshakeFailed",rej);
+      this.on("HandshakeFailed",()=>{
+        rej({description:"HandshakeFailed"});
+      });
     });
   }
 
