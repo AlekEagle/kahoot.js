@@ -1,3 +1,9 @@
-const Client = require("./src/kahoot.js");
+const Client = require('./src/kahoot.js');
 
-module.exports = Client;
+function Kahoot(options) {
+  return new Client(options);
+}
+
+Kahoot.Client = Client;
+
+module.exports = Kahoot;
